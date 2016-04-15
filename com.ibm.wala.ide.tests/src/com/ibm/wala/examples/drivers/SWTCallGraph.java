@@ -64,6 +64,7 @@ public class SWTCallGraph {
   public static void main(String[] args) throws WalaException {
     Properties p = CommandLine.parse(args);
     PDFCallGraph.validateCommandLine(p);
+    //System.out.println(p.getProperty("appJar"));
     run(p);
   }
 

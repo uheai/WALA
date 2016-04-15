@@ -48,6 +48,7 @@ public class SWTTypeHierarchy {
   public static void main(String[] args) {
     // check that the command-line is kosher
     validateCommandLine(args);
+    //System.out.println(args[1]);
     run(args[CLASSPATH_INDEX]);
   }
 
