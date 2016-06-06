@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.ibm.wala.cfg.ControlFlowGraph;
+import com.ibm.wala.cfg.exc.intra.NullPointerState.State;
 import com.ibm.wala.dataflow.graph.DataflowSolver;
 import com.ibm.wala.ipa.cfg.PrunedCFG;
 import com.ibm.wala.ssa.IR;
@@ -138,7 +139,7 @@ public class IntraprocNullPointerAnalysis<T extends ISSABasicBlock> {
         final NullPointerFrameWork<T> problem = new NullPointerFrameWork<T>(cfg, ir);
         final int[] paramValNum = ir.getParameterValueNumbers();
       
-        solver = new NullPointerSolver<T>(problem, maxVarNum, paramValNum, initialState);
+        solver = new NullPointerSolver<T>(problem, maxVarNum, paramValNum, cfg.entry(), initialState);
         
         solver.solve(progress);
         
@@ -195,7 +196,7 @@ public class IntraprocNullPointerAnalysis<T extends ISSABasicBlock> {
       // empty IR ... so states have not changed and we can return the initial state as a save approximation 
       return new NullPointerState(maxVarNum, ir.getSymbolTable(), initialState);
     } else {
-      return solver.getIn(block);
+      return solver.getOut(block);
     }
   }
   
@@ -203,15 +204,17 @@ public class IntraprocNullPointerAnalysis<T extends ISSABasicBlock> {
 
     private final int maxVarNum;
     private final ParameterState parameterState;
+    private final B entry;
 
-    private NullPointerSolver(NullPointerFrameWork<B> problem, int maxVarNum, int[] paramVarNum) {
-      this(problem, maxVarNum, paramVarNum, null);
+    private NullPointerSolver(NullPointerFrameWork<B> problem, int maxVarNum, int[] paramVarNum, B entry) {
+      this(problem, maxVarNum, paramVarNum, entry, null);
     }
     
-    private NullPointerSolver(NullPointerFrameWork<B> problem, int maxVarNum, int[] paramVarNum, ParameterState initialState) {
+    private NullPointerSolver(NullPointerFrameWork<B> problem, int maxVarNum, int[] paramVarNum, B entry, ParameterState initialState) {
       super(problem);
       this.maxVarNum = maxVarNum;
       this.parameterState = initialState;
+      this.entry = entry;
     }
     
     /* (non-Javadoc)
@@ -227,7 +230,11 @@ public class IntraprocNullPointerAnalysis<T extends ISSABasicBlock> {
      */
     @Override
     protected NullPointerState makeNodeVariable(B n, boolean IN) {
-      return new NullPointerState(maxVarNum, ir.getSymbolTable(), parameterState);
+      if (IN && n.equals(entry)) {
+        return new NullPointerState(maxVarNum, ir.getSymbolTable(), parameterState, State.BOTH);
+      } else {
+        return new NullPointerState(maxVarNum, ir.getSymbolTable(), parameterState, State.UNKNOWN);
+      }
     }
 
     @Override
@@ -263,7 +270,7 @@ public class IntraprocNullPointerAnalysis<T extends ISSABasicBlock> {
       SSAInstruction instr = NullPointerTransferFunctionProvider.getRelevantInstruction(bb);
       
       if (instr != null) {
-        currentState = solver.getIn(bb);
+        currentState = getState(bb);
         currentBlock = bb;
         instr.visit(this);
         currentState = null;
@@ -298,6 +305,7 @@ public class IntraprocNullPointerAnalysis<T extends ISSABasicBlock> {
       assert instr.isPEI();
       
       if (instr instanceof SSAAbstractInvokeInstruction) {
+        assert ((SSAAbstractInvokeInstruction) instr).isStatic();
         return mState != null && !mState.throwsException((SSAAbstractInvokeInstruction) instr); 
       } else {
         Collection<TypeReference> exc = instr.getExceptionTypes();
