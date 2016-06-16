@@ -27,6 +27,7 @@ com.ibm.wala.cast.js/lib/
 com.ibm.wala.core.testdata/*.jar
 com.ibm.wala.core.testdata/@dot/
 com.ibm.wala.core.testdata/lib/
+com.ibm.wala.core.testdata/ocaml/
 com.ibm.wala.core.tests/dat/wala.examples.properties
 com.ibm.wala.core.tests/report
 com.ibm.wala.core/@dot
@@ -36,3 +37,7 @@ com.ibm.wala.dalvik/src/logback.xml
 com.ibm.wala.ide.jdt.test/testdata/
 edu.kit.wala.smali.test/out/
 target/
+com.ibm.wala.dalvik.test/data/sample.cup
+com.ibm.wala.dalvik.test/parser.java
+com.ibm.wala.dalvik.test/report
+com.ibm.wala.dalvik.test/sym.java

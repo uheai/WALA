@@ -22,8 +22,8 @@ import java.util.Set;
 
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.NewSiteReference;
+import com.ibm.wala.core.tests.shrike.DynamicCallGraphTestBase;
 import com.ibm.wala.dalvik.classLoader.DexIRFactory;
-import com.ibm.wala.dalvik.test.DalvikTestBase;
 import com.ibm.wala.dalvik.util.AndroidEntryPointLocator;
 import com.ibm.wala.dalvik.util.AndroidEntryPointLocator.LocatorFlags;
 import com.ibm.wala.ipa.callgraph.AnalysisCache;
@@ -59,7 +59,9 @@ import com.ibm.wala.util.collections.Pair;
 import com.ibm.wala.util.functions.Function;
 import com.ibm.wala.util.io.TemporaryFile;
 
-public class DalvikCallGraphTestBase extends DalvikTestBase {
+import static com.ibm.wala.dalvik.test.util.Util.makeDalvikScope;
+
+public class DalvikCallGraphTestBase extends DynamicCallGraphTestBase {
 	
 	protected static <T> Set<T> processCG(CallGraph cg, Predicate<CGNode> filter, Function<CGNode,T> map) {
 		Set<T> result = HashSetFactory.make();
@@ -129,12 +131,7 @@ public class DalvikCallGraphTestBase extends DalvikTestBase {
 
 		AnalysisCache cache = new AnalysisCache(new DexIRFactory());
 
-		Set<LocatorFlags> flags = HashSetFactory.make();
-		flags.add(LocatorFlags.INCLUDE_CALLBACKS);
-		flags.add(LocatorFlags.EP_HEURISTIC);
-		flags.add(LocatorFlags.CB_HEURISTIC);
-		AndroidEntryPointLocator eps = new AndroidEntryPointLocator(flags);
-		List<? extends Entrypoint> es = eps.getEntryPoints(cha);
+		List<? extends Entrypoint> es = getEntrypoints(cha);
 
 		assert ! es.isEmpty();
 		
@@ -150,6 +147,16 @@ public class DalvikCallGraphTestBase extends DalvikTestBase {
 		
 		return Pair.make(callGraph, ptrAnalysis);
 	}
+
+  public static List<? extends Entrypoint> getEntrypoints(final IClassHierarchy cha) {
+    Set<LocatorFlags> flags = HashSetFactory.make();
+		flags.add(LocatorFlags.INCLUDE_CALLBACKS);
+		flags.add(LocatorFlags.EP_HEURISTIC);
+		flags.add(LocatorFlags.CB_HEURISTIC);
+		AndroidEntryPointLocator eps = new AndroidEntryPointLocator(flags);
+		List<? extends Entrypoint> es = eps.getEntryPoints(cha);
+    return es;
+  }
 	
 	public static Pair<CallGraph, PointerAnalysis<InstanceKey>> makeDalvikCallGraph(URI[] androidLibs, File androidAPIJar, String mainClassName, String dexFileName) throws IOException, ClassHierarchyException, IllegalArgumentException, CancelException {
 		AnalysisScope scope = makeDalvikScope(androidLibs, androidAPIJar, dexFileName);

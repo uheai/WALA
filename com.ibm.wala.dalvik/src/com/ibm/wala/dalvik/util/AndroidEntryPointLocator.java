@@ -1,4 +1,13 @@
 /*
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html.
+ * 
+ * This file is a derivative of code released under the terms listed below.  
+ *
+ */
+/*
  *  Copyright (c) 2013,
  *      Tobias Blaschke <code@tobiasblaschke.de>
  *  All rights reserved.
@@ -143,10 +152,20 @@ public final class AndroidEntryPointLocator {
         int dummy = 0;  // for the progress monitor
         for (IClass cls : cha) {
             mon.worked(dummy++);
+            if (cls.getName().toString().contains("MainActivity")) {
+            	System.err.println("got here");
+            }
             if (isExcluded(cls)) continue;
-            if (!cls.isInterface() && !cls.isAbstract() && cls.getClassLoader().getName().equals(AnalysisScope.APPLICATION)) {
+            if (!cls.isInterface() && 
+            	!cls.isAbstract() && 
+            	!( cls.getClassLoader().getName().equals(AnalysisScope.PRIMORDIAL) ||
+            	   cls.getClassLoader().getName().equals(AnalysisScope.EXTENSION)
+            	 )) {
 nextMethod:
                 for (final IMethod m : cls.getDeclaredMethods()) {
+                    if (cls.getName().toString().contains("MainActivity")) {
+                    	System.err.println("got here: " + m);
+                    }
                 	// If there is a Method signature in the possible entry points use thatone
                     for (AndroidPossibleEntryPoint e: possibleEntryPoints) {
                         if (e.name.equals(m.getName().toString()) ) {
@@ -390,7 +409,8 @@ nextMethod:
     }
 
     private boolean isAPIComponent(final IClass cls) {
-        if (cls.getClassLoader().getReference().equals(ClassLoaderReference.Application)) {
+        ClassLoaderReference clr = cls.getClassLoader().getReference();
+		if (! (clr.equals(ClassLoaderReference.Primordial) || clr.equals(ClassLoaderReference.Extension))) {
             if (cls.getName().toString().startsWith("Landroid/")) {
                 return true;
             }
@@ -464,7 +484,10 @@ nextMethod:
      */
     private void populatePossibleEntryPoints() {
         // Populate the list of possible EntryPoints
-
+    	if (possibleEntryPoints.size() > 0) {
+    		// already populated
+    		return;
+    	}
         ApplicationEP.populate(possibleEntryPoints);
 		ActivityEP.populate(possibleEntryPoints);
 		ServiceEP.populate(possibleEntryPoints);
