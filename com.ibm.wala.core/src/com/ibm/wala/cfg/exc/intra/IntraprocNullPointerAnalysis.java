@@ -19,8 +19,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.ibm.wala.cfg.ControlFlowGraph;
-import com.ibm.wala.cfg.exc.intra.NullPointerState.State;
-import com.ibm.wala.dataflow.graph.DataflowSolver;
 import com.ibm.wala.ipa.cfg.PrunedCFG;
 import com.ibm.wala.ssa.IR;
 import com.ibm.wala.ssa.ISSABasicBlock;
@@ -139,7 +137,7 @@ public class IntraprocNullPointerAnalysis<T extends ISSABasicBlock> {
         final NullPointerFrameWork<T> problem = new NullPointerFrameWork<T>(cfg, ir);
         final int[] paramValNum = ir.getParameterValueNumbers();
       
-        solver = new NullPointerSolver<T>(problem, maxVarNum, paramValNum, cfg.entry(), initialState);
+        solver = new NullPointerSolver<T>(problem, maxVarNum, paramValNum, cfg.entry(), ir, initialState);
         
         solver.solve(progress);
         
@@ -198,50 +196,6 @@ public class IntraprocNullPointerAnalysis<T extends ISSABasicBlock> {
     } else {
       return solver.getOut(block);
     }
-  }
-  
-  private class NullPointerSolver<B extends ISSABasicBlock> extends DataflowSolver<B, NullPointerState> {
-
-    private final int maxVarNum;
-    private final ParameterState parameterState;
-    private final B entry;
-
-    private NullPointerSolver(NullPointerFrameWork<B> problem, int maxVarNum, int[] paramVarNum, B entry) {
-      this(problem, maxVarNum, paramVarNum, entry, null);
-    }
-    
-    private NullPointerSolver(NullPointerFrameWork<B> problem, int maxVarNum, int[] paramVarNum, B entry, ParameterState initialState) {
-      super(problem);
-      this.maxVarNum = maxVarNum;
-      this.parameterState = initialState;
-      this.entry = entry;
-    }
-    
-    /* (non-Javadoc)
-     * @see com.ibm.wala.dataflow.graph.DataflowSolver#makeEdgeVariable(java.lang.Object, java.lang.Object)
-     */
-    @Override
-    protected NullPointerState makeEdgeVariable(B src, B dst) {
-      return new NullPointerState(maxVarNum, ir.getSymbolTable(), parameterState);
-    }
-
-    /* (non-Javadoc)
-     * @see com.ibm.wala.dataflow.graph.DataflowSolver#makeNodeVariable(java.lang.Object, boolean)
-     */
-    @Override
-    protected NullPointerState makeNodeVariable(B n, boolean IN) {
-      if (IN && n.equals(entry)) {
-        return new NullPointerState(maxVarNum, ir.getSymbolTable(), parameterState, State.BOTH);
-      } else {
-        return new NullPointerState(maxVarNum, ir.getSymbolTable(), parameterState, State.UNKNOWN);
-      }
-    }
-
-    @Override
-    protected NullPointerState[] makeStmtRHS(int size) {
-      return new NullPointerState[size];
-    }
-    
   }
   
   private class NegativeCFGBuilderVisitor implements IVisitor {
