@@ -20,6 +20,7 @@ import com.ibm.wala.fixpoint.AbstractVariable;
 public class TypeVariable extends AbstractVariable<TypeVariable> {
 
   TypeAbstraction type;
+  private boolean isIntZeroConstant;
 
   public TypeVariable(TypeAbstraction type) {
     if (type == null) {
@@ -44,6 +45,13 @@ public class TypeVariable extends AbstractVariable<TypeVariable> {
     this.type = type;
   }
 
+  public void setIntZeroConstant(boolean newValue) {
+    this.isIntZeroConstant = newValue;
+  }
+
+  public boolean isIntZeroConstant() {
+    return isIntZeroConstant;
+  }
   @Override
   public String toString() {
     return type.toString();

@@ -308,8 +308,9 @@ public class TypeInference extends SSAInference<TypeVariable> implements FixedPo
 
       TypeAbstraction lhsType = lhs.getType();
       TypeAbstraction meet = TypeAbstraction.TOP;
+      boolean ignoreZero = containsNonPrimitiveAndZero(rhs);
       for (int i = 0; i < rhs.length; i++) {
-        if (rhs[i] != null && rhs[i].getType() != null) {
+        if (rhs[i] != null && rhs[i].getType() != null && !(ignoreZero && rhs[i].isIntZeroConstant())) {
           TypeVariable r = rhs[i];
           meet = meet.meet(r.getType());
         }
@@ -322,6 +323,21 @@ public class TypeInference extends SSAInference<TypeVariable> implements FixedPo
       }
     }
 
+    private boolean containsNonPrimitiveAndZero(TypeVariable[] types) {
+      boolean containsNonPrimitive = false;
+      boolean containsZero = false;
+      for (int i = 0; i < types.length; i++) {
+        if (types[i] != null) {
+          if (types[i].getType() != null && types[i].getType().getTypeReference() != null && !types[i].getType().getTypeReference().isPrimitiveType()) {
+            containsNonPrimitive = true;
+          }
+          if (types[i].isIntZeroConstant()) {
+            containsZero = true;
+          }
+        }
+      }
+      return containsNonPrimitive && containsZero;
+    }
     @Override
     public String toString() {
       return "phi meet";
@@ -732,6 +748,10 @@ public class TypeInference extends SSAInference<TypeVariable> implements FixedPo
         if (st.isConstant(valueNumber)) {
           if (st.isBooleanConstant(valueNumber)) {
             return new TypeVariable(language.getPrimitive(language.getConstantType(Boolean.TRUE)));
+          } else if (st.isIntegerConstant(valueNumber) && st.isZero(valueNumber)) {
+            TypeVariable tv = new TypeVariable(language.getPrimitive(language.getConstantType(Integer.valueOf(0))));
+            tv.setIntZeroConstant(true);
+            return tv;
           }
         }
       }
