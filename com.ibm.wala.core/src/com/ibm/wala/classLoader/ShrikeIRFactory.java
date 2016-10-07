@@ -10,19 +10,25 @@
  *******************************************************************************/
 package com.ibm.wala.classLoader;
 
+import com.ibm.wala.analysis.typeInference.TypeAbstraction;
+import com.ibm.wala.analysis.typeInference.TypeInference;
 import com.ibm.wala.cfg.ControlFlowGraph;
 import com.ibm.wala.cfg.ShrikeCFG;
 import com.ibm.wala.ipa.callgraph.Context;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
 import com.ibm.wala.ssa.IR;
 import com.ibm.wala.ssa.IRFactory;
+import com.ibm.wala.ssa.SSAArrayLoadInstruction;
+import com.ibm.wala.ssa.SSAArrayStoreInstruction;
 import com.ibm.wala.ssa.SSABuilder;
 import com.ibm.wala.ssa.SSACFG;
 import com.ibm.wala.ssa.SSAInstruction;
+import com.ibm.wala.ssa.SSAInstructionFactory;
 import com.ibm.wala.ssa.SSAOptions;
 import com.ibm.wala.ssa.ShrikeIndirectionData;
 import com.ibm.wala.ssa.SymbolTable;
 import com.ibm.wala.ssa.analysis.DeadAssignmentElimination;
+import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.WalaRuntimeException;
 
 /**
@@ -104,8 +110,34 @@ public class ShrikeIRFactory implements IRFactory<IBytecodeMethod> {
         eliminateDeadPhis();
 
         setupLocationMap();
+
+        repairTypesForArrayAccesses();
       }
 
+      private void repairTypesForArrayAccesses() {
+        TypeInference ti = TypeInference.make(this, true);
+        SSAInstructionFactory fact = new JavaLanguage.JavaInstructionFactory();
+        for (int i = 0; i < newInstrs.length; i++) {
+          SSAInstruction instr = newInstrs[i];
+          if (instr instanceof SSAArrayLoadInstruction) {
+            SSAArrayLoadInstruction arrLoad = (SSAArrayLoadInstruction) instr;
+            TypeAbstraction ta = ti.getType(arrLoad.getDef());
+            TypeReference betterType = arrLoad.getElementType();
+            if (ta != null && ta.getTypeReference() != null) {
+              betterType = ta.getTypeReference();
+            }
+            newInstrs[i] = fact.ArrayLoadInstruction(arrLoad.iindex, arrLoad.getDef(), arrLoad.getArrayRef(), arrLoad.getIndex(), betterType);
+          } else if (instr instanceof SSAArrayStoreInstruction) {
+            SSAArrayStoreInstruction arrStore = (SSAArrayStoreInstruction) instr;
+            TypeAbstraction ta = ti.getType(arrStore.getValue());
+            TypeReference betterType = arrStore.getElementType();
+            if (ta != null && ta.getTypeReference() != null) {
+              betterType = ta.getTypeReference();
+            }
+            newInstrs[i] = fact.ArrayStoreInstruction(arrStore.iindex, arrStore.getArrayRef(), arrStore.getIndex(), arrStore.getValue(), betterType);
+          }
+        }
+      }
       @SuppressWarnings("unchecked")
       @Override
       protected ShrikeIndirectionData getIndirectionData() {
