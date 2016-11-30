@@ -105,7 +105,7 @@ public class IntentStarters {
         private final Set<StarterFlags> flags;
         private final TypeReference declaringClass;
 
-        StartInfo (final TypeReference declaringClass, final Set<IntentType> targetAccuracy, final Set<AndroidComponent> componentType, 
+        public StartInfo (final TypeReference declaringClass, final Set<IntentType> targetAccuracy, final Set<AndroidComponent> componentType, 
                 final int[] relevantParameters) {
             this(declaringClass, targetAccuracy, componentType, relevantParameters, EnumSet.noneOf(StarterFlags.class));
         }
