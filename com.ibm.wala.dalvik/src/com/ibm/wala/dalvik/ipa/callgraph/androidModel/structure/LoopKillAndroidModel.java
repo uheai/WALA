@@ -133,7 +133,7 @@ public class LoopKillAndroidModel extends LoopAndroidModel {
      *  {@inheritDoc}
      */
     protected int leaveAT_LAST (int PC) {
-        assert(outerLoopPC > 0) : "Somehow you managed to get the loop-target negative. This is wierd!";
+       // assert(outerLoopPC > 0) : "Somehow you managed to get the loop-target negative. This is wierd!";
 
         // Insert the Phis at the beginning of the Block
         int phiPC = outerLoopPC + 1;

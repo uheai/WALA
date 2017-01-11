@@ -180,7 +180,7 @@ public class IntentContextInterpreter implements SSAContextInterpreter {
                     switch (type) {
                         case INTERNAL_TARGET:
                             info = intentStarters.getInfo(method.getReference());
-                            
+                              
                             model = new MicroModel(this.cha, this.options, this.cache, intent.getAction());
                             
                             break;
