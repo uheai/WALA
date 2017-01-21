@@ -20,7 +20,7 @@ import com.ibm.wala.util.MonitorUtil.IProgressMonitor;
  */
 public abstract class AbstractPointsToSolver implements IPointsToSolver {
 
-  protected final static boolean DEBUG = false;
+  protected final static boolean DEBUG = true;
 
   private final PropagationSystem system;
 

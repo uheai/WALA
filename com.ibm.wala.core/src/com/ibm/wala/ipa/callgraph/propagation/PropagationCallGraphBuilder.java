@@ -68,7 +68,7 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
 
   private final static boolean DEBUG_FILTER = DEBUG_ALL | false;
 
-  final protected static boolean DEBUG_GENERAL = DEBUG_ALL | false;
+  final protected static boolean DEBUG_GENERAL = DEBUG_ALL | true;
 
   private final static boolean DEBUG_GET = DEBUG_ALL | false;
 

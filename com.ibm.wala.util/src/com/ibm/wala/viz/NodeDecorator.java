@@ -23,4 +23,16 @@ public interface NodeDecorator<T> {
    */
   String getLabel(T n) throws WalaException;
   
+  /**
+   * Add additional parameters to change node. Line in dot-file
+   * will look like 
+   * <blockquote>
+   * nameOfNode [label="...", this]
+   * </blockquote>
+   * Make sure it is still a proper dot line
+   * @param n 
+   * @return string containing parameters or null
+   */
+  String getAdditionalParameters(T n) throws WalaException;
+  
 }

@@ -84,6 +84,11 @@ public class PDFViewUtil {
       public String getLabel(ISSABasicBlock bb) {
         return labelMap.get(bb);
       }
+
+      @Override
+      public String getAdditionalParameters(ISSABasicBlock n) {
+        return null;
+      }
     };
     return labels;
   }
@@ -106,6 +111,11 @@ public class PDFViewUtil {
     @Override
     public String getLabel(T n) throws WalaException {
       return A.getLabel(n) + B.getLabel(n);
+    }
+
+    @Override
+    public String getAdditionalParameters(T n) {
+      return null;
     }
 
   }

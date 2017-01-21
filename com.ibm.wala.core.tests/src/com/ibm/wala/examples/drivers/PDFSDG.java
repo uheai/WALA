@@ -199,6 +199,11 @@ public class PDFSDG {
         }
       }
 
+      @Override
+      public String getAdditionalParameters(Statement n) throws WalaException {
+        return null;
+      }
+
     };
   }
 

@@ -129,6 +129,11 @@ public class ViewIFDSLocalAction<T, P, F> extends Action {
       }
       return t + " " + result.getResult(t);
     }
+
+    @Override
+    public String getAdditionalParameters(Object n) {
+      return null;
+    }
   }
 
   /**

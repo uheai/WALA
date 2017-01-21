@@ -264,7 +264,9 @@ public class DotUtil {
     StringBuffer result = new StringBuffer();
     result.append(" [ label=\"");
     result.append(getLabel(n, d));
-    result.append("\"]\n");
+    result.append("\""); //end label string
+    result.append(getAdditionalParameters(n, d));
+    result.append("]\n");
     return result.toString();
   }
 
@@ -278,6 +280,20 @@ public class DotUtil {
     }
     if (result.length() >= MAX_LABEL_LENGTH) {
       result = result.substring(0, MAX_LABEL_LENGTH - 3) + "...";
+    }
+    return result;
+  }
+  
+  private static <T> String getAdditionalParameters(T n, NodeDecorator<T> d) throws WalaException {
+    if (d == null) {
+      return "";
+    }
+    String result = null;
+    String params = d.getAdditionalParameters(n);
+    if (params != null) {
+      result = "," + params;
+    } else {
+      result = "";
     }
     return result;
   }
