@@ -67,19 +67,19 @@ import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.ssa.IR;
+import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
 import com.ibm.wala.ssa.SSAOptions;
 import com.ibm.wala.types.FieldReference;
 import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.util.CancelException;
 
-
 /**
  * entry point of analysis and user interface
+ * 
  * @author maik
  *
  */
 public class StringAnalysis {
-	
 
 	private static Logger log = LoggerFactory.getLogger(StringAnalysis.class);
 
@@ -110,16 +110,16 @@ public class StringAnalysis {
 		options.setPiNodePolicy(new PiNodePolicy());
 		provider = new Superprovider(cha, cache, options);
 	}
-	
+
 	public StringAnalysis(CallGraph cg) {
 		cha = cg.getClassHierarchy();
 		cache = new AnalysisCache();
-		//don't need to set options, because cg already took care of it
-		
-		//options = new SSAOptions();
-		//options.setPiNodePolicy(new PiNodePolicy());
-		
-		provider = new Superprovider(cg);		
+		// don't need to set options, because cg already took care of it
+
+		// options = new SSAOptions();
+		// options.setPiNodePolicy(new PiNodePolicy());
+
+		provider = new Superprovider(cg);
 	}
 
 	/**
@@ -131,8 +131,10 @@ public class StringAnalysis {
 
 	/**
 	 * adds fields to scope
+	 * 
 	 * @see FieldVariableProvider#makeFieldVariables(Collection)
-	 * @param fields fields to be added to scope
+	 * @param fields
+	 *            fields to be added to scope
 	 */
 	public void addFields(Collection<IField> fields) {
 		provider.getFieldProvider().makeFieldVariables(fields);
@@ -140,8 +142,10 @@ public class StringAnalysis {
 
 	/**
 	 * adds methods to scope
+	 * 
 	 * @see MethodVariableProvider#makeMethodVariables(Collection)
-	 * @param methods methods to be added to scope 
+	 * @param methods
+	 *            methods to be added to scope
 	 */
 	public void addMethods(Collection<IMethod> methods) {
 		provider.getMethodPovider().makeMethodVariables(methods);
@@ -203,18 +207,19 @@ public class StringAnalysis {
 		// solve Hotspots
 		provider.solveHotspots(methodHotspots, fieldHotspots);
 	}
-	
+
 	/**
-	 * solve equation system just for intents. Has same effect as calling {@link #solveHotspots(Collection, Collection)} 
-	 * with null arguments
+	 * solve equation system just for intents. Has same effect as calling
+	 * {@link #solveHotspots(Collection, Collection)} with null arguments
 	 */
 	public void solveIntentsOnly() {
 		solveHotspots(null, null);
 	}
-	
+
 	/**
-	 * After equation system is built, this method returns all found 
-	 * analyzable methods. This methods may occur as hotspots
+	 * After equation system is built, this method returns all found analyzable
+	 * methods. This methods may occur as hotspots
+	 * 
 	 * @return analyzable methods.
 	 */
 	public Collection<MethodReference> getAnalyzableMethods() {
@@ -311,27 +316,30 @@ public class StringAnalysis {
 	public int getNumberOfInstructions() {
 		return provider.getMethodPovider().getTotalNumberOfInstructions();
 	}
-	
+
 	/**
-	 * Get total number of equation. Equations system has to be build before calling this method.
+	 * Get total number of equation. Equations system has to be build before
+	 * calling this method.
+	 * 
 	 * @return number of equations
 	 */
 	public int getNumberOfEquations() {
 		return provider.getNumberOfEquations();
 	}
-	
+
 	/**
 	 * Number of all analyzed methods
+	 * 
 	 * @return number of methods
 	 */
 	public int getNumberOfAnalyzedMethods() {
 		return provider.getAllMethods().size();
 	}
-	
+
 	public int getNumberOfFields() {
 		return provider.getFieldProvider().size();
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();

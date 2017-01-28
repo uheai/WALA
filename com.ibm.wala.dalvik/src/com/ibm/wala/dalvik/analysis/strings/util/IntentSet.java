@@ -107,7 +107,6 @@ public class IntentSet implements Iterable<Intent> {
 				break;
 			}
 		}
-		assert (pos >= 0); //just for debugging
 		return pos;
 	}
 	

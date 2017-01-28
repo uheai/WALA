@@ -59,25 +59,16 @@ public class CtxSelector implements com.ibm.wala.ipa.callgraph.ContextSelector {
 	private ContextSelector deleg;
 	private IntentStarters starters;
 	private StringAnalysis analysis;
-	//TODO: find right mapping
-	private HashMap<CallSiteReference, IntentCtx> map;
 
 	public CtxSelector(ContextSelector deleg, IClassHierarchy cha, StringAnalysis analysis) {
 		this.deleg = deleg;
 		starters = new IntentStarters(cha);
 		this.analysis = analysis;
-		map = new HashMap<CallSiteReference, IntentCtx>();
 	}
 
 	@Override
 	public Context getCalleeTarget(CGNode caller, CallSiteReference site, IMethod callee,
 			InstanceKey[] actualParameters) {
-		//look for already created context
-		//TODO: this won't work at the moment
-		/*if (map.containsKey(site)) {
-			return map.get(site); 
-		}*/
-		
 		// get context to which we add our information
 		Context context = deleg.getCalleeTarget(caller, site, callee, actualParameters);
 		if (!starters.isStarter(callee.getReference())) {
@@ -98,6 +89,7 @@ public class CtxSelector implements com.ibm.wala.ipa.callgraph.ContextSelector {
 			return intentContext;
 		} else {
 			//TODO: check whether intent is a parameter of this method 
+			analysis.getSolvedMethod(callee.getReference());
 		}
 		return context;
 	}
